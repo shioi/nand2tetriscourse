@@ -10,19 +10,18 @@
 #include <ctype.h>
 #include "parser.h"
 
-int return_instruction_type(char *);
-Instruction parse_A_instruction(char *);
-char * remove_spaces(char *);
 char * decimal_to_binary(int, char *);
 char * dest_cal(char *);
 char * jump_cal(char *);
 char * comp_cal(char *);
-Instruction parse_C_instruction(char *);
+int is_string_number(char *);
+char * symbolreturn(char *);
+
 
 /* finding the instruction type */
 int return_instruction_type(char * instruction){
   int count_char = 0;
-  if(strlen(instruction) > 1 && instruction[0] != '/') {
+  if(strlen(instruction) > 0 && instruction[0] != '/') {
     
     switch(instruction[0]) {
       
@@ -47,24 +46,61 @@ char * remove_spaces(char  * ins) {
   char * new_ins = (char *)malloc(sizeof(char) * strlen(ins));
   int non_space = 0;
   char ch;
+  if (ins[0] == '/')
+    return ins;
   for (int i=0; ins[i] != '\0' && ins[i] != '\n'; i++) {
-    if(ins[i] != '\t' && ins[i] != ' ') {
+    if (ins[i] == '/'){
+      non_space++;
+      break;
+    }
+    else if(ins[i] != '\t' && ins[i] != ' ') {
       new_ins[non_space++] = ins[i];
     }
   }
   new_ins[non_space-1] = '\0';
+  printf("%s\n", new_ins);
   return new_ins;
+}
+
+int is_string_number(char * line ) {
+  int isnum = 1;
+  for (int i=1; i<strlen(line); i++) {
+    if(!isdigit(line[i])){
+      isnum = 0;
+      break;
+    }
+  }
+  return isnum;
+}
+
+char * symbolreturn(char * inst) {
+  char * sym;
+  int length = strlen(inst);
+  sym = (char *)malloc(sizeof(char) * length);
+  int j=0;
+  if (sym) {
+    for(int i=1; i<length; i++)
+      sym[j++] = inst[i];
+  }
+  sym[j] = '\0';
+  return sym;
 }
 
 /* FOR A-INSTRUCTION */
 Instruction parse_A_instruction(char * line) {
   Instruction inst;
+  inst.ins_type = 0;
+  char * sym; 
+  if(is_string_number(line) == 0) { /* not a number but a symbol */
+    inst.a.issymbol = 1;
+    inst.a.sym = symbolreturn(line);
+    return inst;
+  }
+  
   char static binary_num[]= {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','\0'};
   char * number_arr = (char *) malloc(sizeof(char) * strlen(line)-1);
-  
-   inst.ins_type = 0;
    inst.a.msb = line[0];
-
+   inst.a.issymbol = 0;
    //copying
    char ch;
    int i=1,j=0;
@@ -75,7 +111,16 @@ Instruction parse_A_instruction(char * line) {
    free(number_arr);
    inst.a.number = decimal_to_binary(number, binary_num);
    return inst;
+}
 
+/* FOR L-INSTRUCTION labels */
+void parse_L_instruction(char * line, char * value){
+  int j=0;
+  for (int i=1; i<strlen(line)-1; i++) {
+    value[j++] = line[i];
+  }
+  value[j] = '\0';
+  
 }
 
 /* FOR C-INSTRUCTION */

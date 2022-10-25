@@ -9,7 +9,11 @@ typedef struct {
 
 typedef struct {
   char msb;
-  char * number ;
+  int issymbol;
+  union {
+    char * sym;
+    char * number ;    
+  };
 }ainstruction;
 
 typedef struct {
@@ -24,5 +28,7 @@ int return_instruction_type(char *);
 Instruction parse_A_instruction(char *);
 char * remove_spaces(char *);
 Instruction  parse_C_instruction(char *);
+void parse_L_instruction(char *, char *);
+char * decimal_to_binary(int , char *);
 
 #endif

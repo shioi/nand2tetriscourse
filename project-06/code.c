@@ -6,6 +6,7 @@
 #include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "symboltable.h"
 
 char * fetch_code(Instruction*);
 char * a_code(char *);
@@ -18,8 +19,19 @@ char * concatenate_three(const char *, const char *, const char *);
 char * fetch_code(Instruction * inst) {
   //  printf("current instruction is %d\n", inst->ins_type);
   char * generated_code;
+  Symbol * resolved_val;
+
   switch(inst->ins_type) {
   case 0: //A instruction
+
+    if(inst->a.issymbol == 1) {	/* symbol */
+      resolved_val = lookupValue(inst->a.sym);
+      printf("%s\n", resolved_val->value);
+      int number = atoi(resolved_val->value);
+      char static binary_num[]= {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','\0'};
+      inst->a.number = decimal_to_binary(number, binary_num);
+    }
+    
     generated_code = a_code(inst->a.number);
     return generated_code;
     break;
@@ -49,7 +61,6 @@ char * c_code(Instruction * inst) {
   dest = dest_code(inst->c.dest);
   jump = jump_code(inst->c.jump);
   comp = comp_code(inst->c.comp,&a_value);
-  printf("%s\n",comp);
   temp_code = concatenate_three(comp,dest,jump);
 
   char * generated_code = (char*)malloc(sizeof(char) * 17);

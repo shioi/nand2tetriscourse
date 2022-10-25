@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "code.h"
+#include "symboltable.h"
 
 #define LINE_SIZE  120
 #define WORD_SIZE 16
@@ -13,6 +14,13 @@ void read_line(char *);
 int drive(char *, FILE * );
 void write_to_file(FILE *, char *);
 FILE * create_new_file(char *);
+void constructsymtable(char *);
+
+void constructsymtable(char * filename) {
+  construct();
+  firstpass(filename);
+  secondpass(filename);
+}
 
 FILE * create_new_file(char * oriname) {
   char * newname = (char *) malloc(sizeof(char)* strlen(oriname)+2);
@@ -96,6 +104,7 @@ int main(int argc, char ** argv)  {
     exit(EXIT_FAILURE);
   }
   //TODO: Checking for the right extension for the files
+  constructsymtable(argv[1]);
   read_line(argv[1]);
 }
 
